@@ -1,5 +1,7 @@
 package token
 
+import "strconv"
+
 type NumToken struct {
 	BaseToken
 	value int
@@ -15,4 +17,8 @@ func (self *NumToken) IsNumber() bool {
 
 func (self *NumToken) GetNumber() int {
 	return self.value
+}
+
+func (self *NumToken) GetText() string {
+	return strconv.Itoa(self.value)
 }
