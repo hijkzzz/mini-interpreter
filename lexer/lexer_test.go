@@ -1,14 +1,15 @@
-package stone
+package lexer
 
 import (
+	"stone/lexer/token"
+
 	"testing"
 	"os"
-	"stone/token"
 	"fmt"
 )
 
 func Test_Lexer_Read(t *testing.T) {
-	fin, err := os.Open("Lexer_test")
+	fin, err := os.Open("lexer_test")
 	if err != nil {
 		panic(err)
 	}

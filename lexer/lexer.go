@@ -1,7 +1,8 @@
-package stone
+package lexer
 
 import (
-	"stone/token"
+	"stone/lexer/token"
+
 	"regexp"
 	"bufio"
 	"io"
