@@ -8,3 +8,34 @@ type Token interface {
 	IsNumber() bool
 	IsString() bool
 }
+
+type token struct {
+	lineNumber int
+}
+
+func (self *token) GetLineNumber() int {
+	return self.lineNumber
+}
+
+func (self *token) GetNumber() int {
+	panic("not number token")
+}
+
+func (self *token) GetText() string {
+	return ""
+}
+
+func (self *token) IsIdentifier() bool {
+	return false
+}
+
+func (self *token) IsNumber() bool {
+	return false
+}
+
+func (self *token) IsString() bool {
+	return false
+}
+
+var EOF Token = &token{-1}
+var EOL string = "\\n"

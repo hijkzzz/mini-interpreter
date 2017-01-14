@@ -1,12 +1,12 @@
 package token
 
 type StrToken struct {
-	BaseToken
+	token
 	str string
 }
 
 func NewStrToken(lineNumber int, str string) *StrToken {
-	return &StrToken{BaseToken{lineNumber}, str}
+	return &StrToken{token{lineNumber}, str}
 }
 
 func (self *StrToken) IsString() bool {

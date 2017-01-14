@@ -3,12 +3,12 @@ package token
 import "strconv"
 
 type NumToken struct {
-	BaseToken
+	token
 	value int
 }
 
 func NewNumToken(lineNumber int, value int) *NumToken {
-	return &NumToken{BaseToken{lineNumber}, value}
+	return &NumToken{token{lineNumber}, value}
 }
 
 func (self *NumToken) IsNumber() bool {

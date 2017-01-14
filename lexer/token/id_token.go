@@ -1,12 +1,12 @@
 package token
 
 type IdToken struct {
-	BaseToken
+	token
 	text string
 }
 
 func NewIdToken(lineNumber int, id string) *StrToken {
-	return &StrToken{BaseToken{lineNumber}, id}
+	return &StrToken{token{lineNumber}, id}
 }
 
 func (self *IdToken) IsIdentifier() bool {
