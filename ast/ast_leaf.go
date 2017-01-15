@@ -1,7 +1,7 @@
 package ast
 
 import (
-	"stone/lexer/token"
+	"stone/token"
 	"strconv"
 )
 

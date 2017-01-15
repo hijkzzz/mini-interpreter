@@ -1,6 +1,6 @@
 package ast
 
-import "stone/lexer/token"
+import "stone/token"
 
 type Name struct {
 	astLeaf

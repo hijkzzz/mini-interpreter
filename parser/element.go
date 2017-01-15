@@ -1,8 +1,11 @@
 package parser
 
-import "stone/lexer"
+import (
+	"stone/lexer"
+	"stone/ast"
+)
 
 type Element interface {
-	Parse (lexer *lexer.Lexer, res []ASTree)
+	Parse (lexer *lexer.Lexer , res *[]ast.ASTree)
 	Match (lexer *lexer.Lexer) bool
 }
