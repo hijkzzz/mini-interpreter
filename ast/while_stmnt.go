@@ -1,6 +1,5 @@
 package ast
 
-import "fmt"
 
 type WhileStmnt struct {
 	astList
@@ -19,5 +18,5 @@ func (self *WhileStmnt) Body() ASTree {
 }
 
 func (self *WhileStmnt) String() string {
-	return fmt.Sprintf("(while %v %v)", self.Condition(), self.Body())
+	return "(while " + self.Condition().String() + " " + self.Body().String() + ")"
 }

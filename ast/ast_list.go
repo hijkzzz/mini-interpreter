@@ -2,6 +2,9 @@ package ast
 
 import "bytes"
 
+/*
+	抽象语法树之非叶节点基类
+ */
 type ASTList interface {
 	ASTree
 }

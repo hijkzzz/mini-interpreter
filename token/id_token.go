@@ -5,8 +5,8 @@ type IdToken struct {
 	text string
 }
 
-func NewIdToken(lineNumber int, id string) *StrToken {
-	return &StrToken{token{lineNumber}, id}
+func NewIdToken(lineNumber int, id string) *IdToken {
+	return &IdToken{token{lineNumber}, id}
 }
 
 func (self *IdToken) IsIdentifier() bool {

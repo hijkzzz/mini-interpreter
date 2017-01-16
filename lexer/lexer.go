@@ -72,6 +72,7 @@ func (self *Lexer) readLine() {
 			line = line[len(groups[0]):]
 			groups = self.pattern.FindStringSubmatch(line)
 		}
+		self.queue = append(self.queue, token.NewIdToken(self.lineNo, token.EOL))
 	} else {
 		self.hasMore = false
 	}
@@ -111,4 +112,8 @@ func (self *Lexer) toStringLiteral(s string) string {
 		buffer.WriteByte(c)
 	}
 	return buffer.String()
+}
+
+func (self *Lexer) GetLineNumber() string {
+	return strconv.Itoa(self.lineNo)
 }

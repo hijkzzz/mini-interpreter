@@ -6,6 +6,7 @@ import (
 	"testing"
 	"os"
 	"fmt"
+	"reflect"
 )
 
 func Test_Lexer_Read(t *testing.T) {
@@ -16,6 +17,6 @@ func Test_Lexer_Read(t *testing.T) {
 
 	l := NewLexer(fin)
 	for t := l.Read(); t != token.EOF; t = l.Read() {
-		fmt.Printf("%d %s\n", t.GetLineNumber(), t.GetText())
+		fmt.Printf("%v %d %s\n", reflect.TypeOf(t), t.GetLineNumber(), t.GetText())
 	}
 }

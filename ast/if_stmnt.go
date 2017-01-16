@@ -24,4 +24,9 @@ func (self *IfStmnt) ElseBlock() ASTree {
 	}
 }
 
+func (self *IfStmnt) String() string {
+	return "(if " + self.Condition().String() + " " + self.ThenBlock().String() +
+		" else " + self.ElseBlock().String() + ")"
+}
+
 

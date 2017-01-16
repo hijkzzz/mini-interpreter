@@ -5,6 +5,10 @@ import (
 	"strconv"
 )
 
+/*
+	抽象语法树之叶节点基类
+ */
+
 type ASTLeaf interface {
 	ASTree
 	Token() token.Token
