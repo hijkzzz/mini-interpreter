@@ -1,5 +1,7 @@
 package ast
 
+import "bytes"
+
 type ASTList interface {
 	ASTree
 }
@@ -27,4 +29,17 @@ func (self *astList) Location() string {
 		}
 	}
 	return ""
+}
+
+func (self *astList) String() string {
+	var buf bytes.Buffer
+	buf.WriteString("(")
+	sep := ""
+	for _, t := range self.children {
+		buf.WriteString(sep)
+		buf.WriteString(t.String())
+		sep = " "
+	}
+	buf.WriteString(")")
+	return buf.String()
 }

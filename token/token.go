@@ -13,6 +13,9 @@ type token struct {
 	lineNumber int
 }
 
+var EOF Token = &token{-1}
+var EOL string = "\\n"
+
 func (self *token) GetLineNumber() int {
 	return self.lineNumber
 }
@@ -37,5 +40,3 @@ func (self *token) IsString() bool {
 	return false
 }
 
-var EOF Token = &token{-1}
-var EOL string = "\\n"

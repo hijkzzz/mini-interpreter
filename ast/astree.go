@@ -5,4 +5,5 @@ type ASTree interface {
 	Children() []ASTree
 	NumChildren() int
 	Location() string
+	String() string
 }

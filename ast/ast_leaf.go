@@ -30,6 +30,10 @@ func (self *astLeaf) Location() string {
 	return "at line " + strconv.Itoa(self.token.GetLineNumber())
 }
 
+func (self *astLeaf) String() string {
+	return self.token.GetText()
+}
+
 func (self *astLeaf) Token() token.Token {
 	return self.token
 }
