@@ -1,5 +1,10 @@
 package token
 
+/*
+	单词接口
+	数字，字符串，标识符三种类型
+ */
+
 type Token interface {
 	GetLineNumber() int
 	GetNumber() int

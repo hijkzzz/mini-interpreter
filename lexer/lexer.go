@@ -10,6 +10,11 @@ import (
 	"bytes"
 )
 
+/*
+	词法分析器
+	源文件被分割为——数字，字符串，标识符序列
+ */
+
 type Lexer struct {
 	queue []token.Token
 	hasMore bool
@@ -60,6 +65,9 @@ func (self *Lexer) readLine() {
 		line := self.reader.Text()
 		groups := self.pattern.FindStringSubmatch(line)
 		for len(line) > 0 {
+			if (groups == nil) {
+				panic("lexer error at line " + strconv.Itoa(self.lineNo))
+			}
 			self.addToken(groups)
 			line = line[len(groups[0]):]
 			groups = self.pattern.FindStringSubmatch(line)

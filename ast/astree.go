@@ -1,5 +1,10 @@
 package ast
 
+/*
+	抽象语法树节点
+	astree, ast_list, ast_leaf 为抽象类
+ */
+
 type ASTree interface {
 	Child(i int) ASTree
 	Children() []ASTree
