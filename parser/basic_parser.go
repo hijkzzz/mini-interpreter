@@ -143,9 +143,9 @@ func (self *BasicParser) rightIsExpr(prec int, nextPrec *Precedence) bool {
 
 func (self *BasicParser) block() ast.ASTree{
 	self.readToken("{")
-	list := make([]ast.ASTree, 1)
+	list := make([]ast.ASTree, 0)
 	if self.testStatement() {
-		list[0] = self.statement()
+		list = append(list, self.statement())
 	}
 
 	t := self.lexer.Peek(0)
@@ -153,10 +153,12 @@ func (self *BasicParser) block() ast.ASTree{
 		self.lexer.Read()
 		if self.testStatement() {
 			list = append(list, self.statement())
-		} else {
-			list = append(list, ast.NewNullStmnt([]ast.ASTree{}))
 		}
 		t = self.lexer.Peek(0)
+	}
+
+	if len(list) == 0 {
+		list = append(list, ast.NewNullStmnt([]ast.ASTree{}))
 	}
 	self.readToken("}")
 	return ast.NewBlockStmnt(list)

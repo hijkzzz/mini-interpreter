@@ -1,6 +1,5 @@
 package ast
 
-
 type WhileStmnt struct {
 	astList
 }
@@ -18,5 +17,6 @@ func (self *WhileStmnt) Body() ASTree {
 }
 
 func (self *WhileStmnt) String() string {
-	return "(while " + self.Condition().String() + " " + self.Body().String() + ")"
+	b := self.Body()
+	return "(while " + self.Condition().String() + " " + b.String() + ")"
 }
