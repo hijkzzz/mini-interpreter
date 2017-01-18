@@ -1,7 +1,14 @@
-sum = 0
+even = 0
+odd = 0
 i = 1
 while i < 10 {
-    sum = sum + i
+    if i % 2 == 0 {     // event number ?
+        even = even + i
+    } else {
+        odd = odd + i
+    }
     i = i + 1
 }
-sum
+even
+-odd
+"Hello " + "World"
