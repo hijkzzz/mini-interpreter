@@ -1,6 +1,8 @@
 package ast
 
-import "stone/token"
+import (
+	"stone/token"
+)
 
 type OP struct {
 	astLeaf

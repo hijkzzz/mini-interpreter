@@ -1,6 +1,9 @@
 package ast
 
-import "fmt"
+import (
+	"fmt"
+	"stone/environment"
+)
 
 type NegativeExpr struct {
 	astList
@@ -15,5 +18,14 @@ func (self *NegativeExpr) Operand() ASTree {
 }
 
 func (self *NegativeExpr) String() string {
-	return fmt.Sprintf("-%v", self.Operand())
+	return fmt.Sprintf("(-%v)", self.Operand())
+}
+
+func (self *NegativeExpr) Eval(env environment.Environment) interface{} {
+	v := self.Operand().Eval(env)
+	switch v.(type) {
+	case int:
+		return -v.(int)
+	}
+	panic("bad type for -")
 }

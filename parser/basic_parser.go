@@ -57,28 +57,32 @@ func NewBasicParser(lexer *lexer.Lexer) *BasicParser {
 }
 
 func (self *BasicParser) primary() ast.ASTree{
-	list := make([]ast.ASTree, 1)
+	var a ast.ASTree
+
 	t := self.lexer.Read()
 	if t.IsIdentifier() && t.GetText() == "(" {
-		list[0] = self.expr()
+		a = self.expr()
 		self.readToken(")")
 	} else if t.IsIdentifier() && self.reserved[t.GetText()] == false {
-		list[0] = ast.NewName(t)
+		a = ast.NewName(t)
 	} else if t.IsString() {
-		list[0] = ast.NewStringLiteral(t)
+		a = ast.NewStringLiteral(t)
 	} else if t.IsNumber() {
-		list[0] = ast.NewNumberLiteral(t)
+		a = ast.NewNumberLiteral(t)
 	} else {
 		panic("parser error at line " + self.lexer.GetLineNumber())
 	}
 
-	return ast.NewPrimaryExpr(list)
+	return a
 }
 
 func (self *BasicParser) testPrimary() bool {
 	t := self.lexer.Peek(0)
-	if t.IsIdentifier() && (self.reserved[t.GetText()] == true) {
-		return false
+	if t.IsIdentifier() {
+		_, ok := self.reserved[t.GetText()]
+		if ok {
+			return false
+		}
 	}
 	return true
 }

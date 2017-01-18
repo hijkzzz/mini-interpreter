@@ -1,6 +1,9 @@
 package ast
 
-import "bytes"
+import (
+	"bytes"
+	"stone/environment"
+)
 
 /*
 	抽象语法树之非叶节点基类
@@ -45,4 +48,8 @@ func (self *astList) String() string {
 	}
 	buf.WriteString(")")
 	return buf.String()
+}
+
+func (self *astList) Eval(env environment.Environment) interface{} {
+	panic("cannot eval " + self.String())
 }

@@ -1,5 +1,10 @@
 package ast
 
+import (
+	"reflect"
+	"stone/environment"
+)
+
 type IfStmnt struct {
 	astList
 }
@@ -25,8 +30,25 @@ func (self *IfStmnt) ElseBlock() ASTree {
 }
 
 func (self *IfStmnt) String() string {
-	return "(if " + self.Condition().String() + " " + self.ThenBlock().String() +
-		" else " + self.ElseBlock().String() + ")"
+	result := "(if " + self.Condition().String() + " " + self.ThenBlock().String()
+	if self.ElseBlock() != nil {
+		result += " else " + self.ElseBlock().String()
+	}
+	return result + ")"
+}
+
+func (self *IfStmnt) Eval(env environment.Environment) interface{} {
+	c := self.Condition().Eval(env)
+	if reflect.TypeOf(c).Kind() == reflect.Int && c.(int) == 1 {
+		return self.ThenBlock().Eval(env)
+	} else {
+		e := self.ElseBlock()
+		if e == nil {
+			return 0
+		} else {
+			return e.Eval(env)
+		}
+	}
 }
 
 

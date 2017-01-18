@@ -3,6 +3,7 @@ package ast
 import (
 	"stone/token"
 	"strconv"
+	"stone/environment"
 )
 
 /*
@@ -36,6 +37,10 @@ func (self *astLeaf) Location() string {
 
 func (self *astLeaf) String() string {
 	return self.token.GetText()
+}
+
+func (self *astLeaf) Eval(env environment.Environment) interface{} {
+	panic("cannot eval " + self.String())
 }
 
 func (self *astLeaf) Token() token.Token {
