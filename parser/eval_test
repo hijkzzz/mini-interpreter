@@ -13,5 +13,5 @@ while i < 10 {
 }
 even
 -odd
-sum
-"Hello " + "World" + sum
+"sum = " + sum
+"Hello " + "World " + sum

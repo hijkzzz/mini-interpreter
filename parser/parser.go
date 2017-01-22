@@ -9,7 +9,7 @@ import (
 /*
 	Grammer Definition
 
-	primary : "(" expr ")" | NUMBER | ID | STRING
+	primary : ( "(" expr ")" | NUMBER | ID [ postfix ] | STRING ) |
 	factor  : "-" primary | primary
 	expr 	: factor { OP factor }
 	block   : "{" [ statement ] { ( ";" | EOL ) [ statement ] } "}"
@@ -17,7 +17,14 @@ import (
 	statement : "if" expr block [ "else" block ]
 		| "while" expr block
 		| simple
-	program : [ statement ] ( ";" | EOL )
+	program : [ def | statement ] ( ";" | EOL )
+
+	parm 	: IDENTIFIER
+	params  : param { "," param }
+	param_list : "(" [param] ")"
+	def 	: "def" IDENTIFIER param_list block
+	args    : expr { "," expr }
+	postfix : "(" [ args ] ")"
 */
 
 type Precedence struct {
@@ -39,6 +46,22 @@ func NewParser(lexer *lexer.Lexer) *Parser {
 	reserved := map[string]bool {
 		";" : true,
 		"}" : true,
+		"{" : true,
+		"(" : true,
+		")" : true,
+		"+" : true,
+		"-" : true,
+		"*" : true,
+		"/" : true,
+		"%" : true,
+		"==" : true,
+		"=" : true,
+		">" : true,
+		"<" : true,
+		"if" : true,
+		"else" : true,
+		"while" : true,
+		"def" : true,
 		token.EOL : true,
 	}
 
@@ -63,8 +86,11 @@ func (self *Parser) primary() ast.ASTree{
 	if t.IsIdentifier() && t.GetText() == "(" {
 		a = self.expr()
 		self.readToken(")")
-	} else if t.IsIdentifier() && self.reserved[t.GetText()] == false {
+	} else if self.isIdentifier(t) {
 		a = ast.NewName(t)
+		if self.testPostfix() {
+			return ast.NewCallFunc([]ast.ASTree{a, self.postfix()})
+		}
 	} else if t.IsString() {
 		a = ast.NewStringLiteral(t)
 	} else if t.IsNumber() {
@@ -78,11 +104,8 @@ func (self *Parser) primary() ast.ASTree{
 
 func (self *Parser) testPrimary() bool {
 	t := self.lexer.Peek(0)
-	if t.IsIdentifier() {
-		_, ok := self.reserved[t.GetText()]
-		if ok {
-			return false
-		}
+	if t.IsIdentifier() && !self.isIdentifier(t) {
+		return false
 	}
 	return true
 }
@@ -210,10 +233,12 @@ func (self *Parser) testStatement() bool {
 		self.testSimple()
 }
 
-func (self *Parser) program() ast.ASTree{
+func (self *Parser) program() ast.ASTree {
 	var a ast.ASTree
 	if self.testStatement() {
 		a = self.statement()
+	} else if self.isToken("def") {
+		a = self.def()
 	} else {
 		a = ast.NewNullStmnt([]ast.ASTree{})
 	}
@@ -227,7 +252,94 @@ func (self *Parser) program() ast.ASTree{
 }
 
 func (self *Parser) testProgram() bool {
-	return self.testStatement()
+	return self.isToken("def") || self.testStatement()
+}
+
+func (self *Parser) params() ast.ASTree {
+	list := make([]ast.ASTree, 0)
+	if self.testParams() {
+		list = append(list, ast.NewName(self.lexer.Read()))
+	} else {
+		panic("parser error at line " + self.lexer.GetLineNumber())
+	}
+
+	for self.isToken(",") {
+		if self.testParams() {
+			list = append(list, ast.NewName(self.lexer.Read()))
+		} else {
+			panic("parser error at line " + self.lexer.GetLineNumber())
+		}
+	}
+
+	return ast.NewParameterList(list)
+}
+
+func (self *Parser) testParams() bool {
+	return self.isIdentifier(self.lexer.Peek(0))
+}
+
+func (self *Parser) paramList() ast.ASTree {
+	self.readToken("(")
+	var a ast.ASTree = ast.NewParameterList(nil)
+	if self.testParams() {
+		a = self.params()
+	}
+	self.readToken(")")
+	return a
+}
+
+func (self *Parser) testParamList() bool {
+	return self.isToken("(")
+}
+
+func (self *Parser) def() ast.ASTree {
+	self.readToken("def")
+	list := make([]ast.ASTree, 3)
+	if self.isIdentifier(self.lexer.Peek(0)) {
+		list[0] = ast.NewName(self.lexer.Read())
+		list[1] = self.paramList()
+		list[2] = self.block()
+	} else {
+		panic("parser error at line " + self.lexer.GetLineNumber())
+	}
+
+	return ast.NewDefStmnt(list)
+}
+
+func (self *Parser) testDef() bool {
+	return self.isToken("def")
+}
+
+func (self *Parser) args() ast.ASTree {
+	list := make([]ast.ASTree, 1)
+	list[0] = self.expr()
+	for self.isToken(",") {
+		list = append(list, self.expr())
+	}
+	return ast.NewArguments(list)
+}
+
+func (self *Parser) testArgs() bool {
+	return self.testExpr()
+}
+
+func (self *Parser) postfix() ast.ASTree {
+	self.readToken("(")
+	var a ast.ASTree = ast.NewArguments(nil)
+	if self.testArgs() {
+		a = self.args()
+	}
+	self.readToken(")")
+	return a
+}
+
+func (self *Parser) testPostfix() bool {
+	self.isToken("(")
+}
+
+func (self *Parser) isToken(name string) bool{
+	t := self.lexer.Peek(0)
+	return t.IsIdentifier() && name == t.GetText()
 }
 
 func (self *Parser) readToken(name string) {
@@ -237,7 +349,15 @@ func (self *Parser) readToken(name string) {
 	}
 }
 
-func (self *Parser) isToken(name string) bool{
-	t := self.lexer.Peek(0)
-	return t.IsIdentifier() && name == t.GetText()
+func (self *Parser) isIdentifier(t token.Token) bool {
+	if t.IsIdentifier() {
+		_, ok := self.reserved[t.GetText()]
+		if ok {
+			return false
+		} else {
+			return true
+		}
+	} else {
+		return false
+	}
 }
