@@ -9,30 +9,30 @@ import (
 	"stone/environment"
 )
 
-func Test_BasicParser_Program(t *testing.T) {
-	fin, err := os.Open("basic_parser_test")
+func Test_Parser(t *testing.T) {
+	fin, err := os.Open("parser_test")
 	if err != nil {
 		panic(err)
 	}
 
 	l := lexer.NewLexer(fin)
-	p := NewBasicParser(l)
+	p := NewParser(l)
 	for l.Peek(0) != token.EOF {
-		fmt.Println(p.Program().String())
+		fmt.Println(p.program().String())
 	}
 }
 
-func Test_ASTree_Eval(t *testing.T) {
-	fin, err := os.Open("astree_eval_test")
+func Test_Eval(t *testing.T) {
+	fin, err := os.Open("eval_test")
 	if err != nil {
 		panic(err)
 	}
 
 	l := lexer.NewLexer(fin)
-	p := NewBasicParser(l)
+	p := NewParser(l)
 	e := environment.NewBasicEnv()
 	for l.Peek(0) != token.EOF {
-		program := p.Program()
+		program := p.program()
 		result := program.Eval(e)
 		fmt.Println(result)
 	}

@@ -3,6 +3,7 @@ package ast
 import (
 	"reflect"
 	"stone/environment"
+	"strconv"
 )
 
 type BinaryExpr struct {
@@ -63,6 +64,10 @@ func (self *BinaryExpr) computeOp(left interface{}, op string, right interface{}
 		if op == "+" {
 			if leftKind == reflect.String && rightKind == reflect.String {
 				return left.(string) + right.(string)
+			} else if leftKind == reflect.String && rightKind == reflect.Int {
+				return left.(string) + strconv.Itoa(right.(int))
+			} else if leftKind == reflect.Int && rightKind == reflect.String {
+				return strconv.Itoa(left.(int)) + right.(string)
 			} else {
 				panic("bad +")
 			}

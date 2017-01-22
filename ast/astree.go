@@ -15,5 +15,6 @@ type ASTree interface {
 	NumChildren() int
 	Location() string
 	String() string
+
 	Eval(env environment.Environment) interface{}
 }

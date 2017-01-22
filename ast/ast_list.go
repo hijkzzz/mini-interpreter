@@ -6,7 +6,7 @@ import (
 )
 
 /*
-	抽象语法树之非叶节点基类
+	抽象语法树——非叶节点基类
  */
 type ASTList interface {
 	ASTree

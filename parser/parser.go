@@ -18,9 +18,9 @@ import (
 		| "while" expr block
 		| simple
 	program : [ statement ] ( ";" | EOL )
- */
+*/
 
-type Precedence struct{
+type Precedence struct {
 	value int
 	leftAssoc bool
 }
@@ -29,13 +29,13 @@ func NewPrecedence(v int, a bool) *Precedence {
 	return &Precedence{v, a}
 }
 
-type BasicParser struct {
+type Parser struct {
 	lexer *lexer.Lexer
 	reserved map[string]bool
 	operators map[string]*Precedence
 }
 
-func NewBasicParser(lexer *lexer.Lexer) *BasicParser {
+func NewParser(lexer *lexer.Lexer) *Parser {
 	reserved := map[string]bool {
 		";" : true,
 		"}" : true,
@@ -53,10 +53,10 @@ func NewBasicParser(lexer *lexer.Lexer) *BasicParser {
 		"/" : NewPrecedence(4, true),
 		"%" : NewPrecedence(4, true),
 	}
-	return &BasicParser{lexer, reserved, operators}
+	return &Parser{lexer, reserved, operators}
 }
 
-func (self *BasicParser) primary() ast.ASTree{
+func (self *Parser) primary() ast.ASTree{
 	var a ast.ASTree
 
 	t := self.lexer.Read()
@@ -76,7 +76,7 @@ func (self *BasicParser) primary() ast.ASTree{
 	return a
 }
 
-func (self *BasicParser) testPrimary() bool {
+func (self *Parser) testPrimary() bool {
 	t := self.lexer.Peek(0)
 	if t.IsIdentifier() {
 		_, ok := self.reserved[t.GetText()]
@@ -87,7 +87,7 @@ func (self *BasicParser) testPrimary() bool {
 	return true
 }
 
-func (self *BasicParser) factor() ast.ASTree{
+func (self *Parser) factor() ast.ASTree{
 
 	if self.isToken("-") {
 		self.lexer.Read()
@@ -97,13 +97,13 @@ func (self *BasicParser) factor() ast.ASTree{
 	}
 }
 
-func (self *BasicParser) testFactor() bool {
+func (self *Parser) testFactor() bool {
 	return self.isToken("-") || self.testPrimary()
 }
 
 // 算法优先分析法
 // 用于处理运算符优先级
-func (self *BasicParser) expr() ast.ASTree{
+func (self *Parser) expr() ast.ASTree{
 	right := self.factor()
 	next := self.nextOperator()
 	for next != nil {
@@ -113,11 +113,11 @@ func (self *BasicParser) expr() ast.ASTree{
 	return right
 }
 
-func (self * BasicParser) testExpr() bool {
+func (self *Parser) testExpr() bool {
 	return self.testFactor()
 }
 
-func (self *BasicParser) doShift(left ast.ASTree, prec int) ast.ASTree{
+func (self *Parser) doShift(left ast.ASTree, prec int) ast.ASTree{
 	op := ast.NewOP(self.lexer.Read())
 	right := self.factor()
 	next := self.nextOperator()
@@ -128,7 +128,7 @@ func (self *BasicParser) doShift(left ast.ASTree, prec int) ast.ASTree{
 	return ast.NewBinaryExpr([]ast.ASTree{left, op, right})
 }
 
-func (self *BasicParser) nextOperator() *Precedence {
+func (self *Parser) nextOperator() *Precedence {
 	t := self.lexer.Peek(0)
 	if t.IsIdentifier() {
 		return self.operators[t.GetText()]
@@ -137,7 +137,7 @@ func (self *BasicParser) nextOperator() *Precedence {
 	}
 }
 
-func (self *BasicParser) rightIsExpr(prec int, nextPrec *Precedence) bool {
+func (self *Parser) rightIsExpr(prec int, nextPrec *Precedence) bool {
 	if nextPrec.leftAssoc {
 		return prec < nextPrec.value
 	} else {
@@ -145,7 +145,7 @@ func (self *BasicParser) rightIsExpr(prec int, nextPrec *Precedence) bool {
 	}
 }
 
-func (self *BasicParser) block() ast.ASTree{
+func (self *Parser) block() ast.ASTree{
 	self.readToken("{")
 	list := make([]ast.ASTree, 0)
 	if self.testStatement() {
@@ -168,19 +168,19 @@ func (self *BasicParser) block() ast.ASTree{
 	return ast.NewBlockStmnt(list)
 }
 
-func (self *BasicParser) testBlock() bool {
+func (self *Parser) testBlock() bool {
 	return self.isToken("{")
 }
 
-func (self *BasicParser) simple() ast.ASTree{
+func (self *Parser) simple() ast.ASTree{
 	return self.expr()
 }
 
-func (self *BasicParser) testSimple() bool {
+func (self *Parser) testSimple() bool {
 	return self.testExpr()
 }
 
-func (self *BasicParser) statement() ast.ASTree{
+func (self *Parser) statement() ast.ASTree{
 	list := make([]ast.ASTree, 2)
 
 	if self.isToken("if") {
@@ -204,13 +204,13 @@ func (self *BasicParser) statement() ast.ASTree{
 	}
 }
 
-func (self *BasicParser) testStatement() bool {
+func (self *Parser) testStatement() bool {
 	return self.isToken("if") ||
 		self.isToken("while") ||
 		self.testSimple()
 }
 
-func (self *BasicParser) Program() ast.ASTree{
+func (self *Parser) program() ast.ASTree{
 	var a ast.ASTree
 	if self.testStatement() {
 		a = self.statement()
@@ -226,18 +226,18 @@ func (self *BasicParser) Program() ast.ASTree{
 	return a
 }
 
-func (self *BasicParser) TestProgram() bool {
+func (self *Parser) testProgram() bool {
 	return self.testStatement()
 }
 
-func (self *BasicParser) readToken(name string) {
+func (self *Parser) readToken(name string) {
 	t := self.lexer.Read()
 	if !(t.IsIdentifier() && name == t.GetText()) {
 		panic("parser error at line " + self.lexer.GetLineNumber())
 	}
 }
 
-func (self *BasicParser) isToken(name string) bool{
+func (self *Parser) isToken(name string) bool{
 	t := self.lexer.Peek(0)
 	return t.IsIdentifier() && name == t.GetText()
 }

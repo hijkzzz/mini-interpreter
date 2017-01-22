@@ -7,7 +7,7 @@ import (
 )
 
 /*
-	抽象语法树之叶节点基类
+	抽象语法树——叶节点基类
  */
 
 type ASTLeaf interface {
