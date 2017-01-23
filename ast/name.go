@@ -17,7 +17,7 @@ func (self *Name) Name() string {
 	return self.token.GetText()
 }
 
-func (self *Name) Eval(env environment.Environment) interface{} {
+func (self *Name) Eval(env environment.Environment, args... interface{}) interface{} {
 	value := env.Get(self.Name())
 	if value == nil {
 		panic("undefined name " + self.Name())

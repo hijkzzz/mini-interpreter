@@ -31,7 +31,7 @@ func (self *BinaryExpr) Right() ASTree {
 	return self.Child(2)
 }
 
-func (self *BinaryExpr) Eval(env environment.Environment) interface{} {
+func (self *BinaryExpr) Eval(env environment.Environment, args... interface{}) interface{} {
 	op := self.Operator()
 	if op == "="  {
 		right := self.Right().Eval(env)

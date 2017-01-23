@@ -37,7 +37,7 @@ func (self *IfStmnt) String() string {
 	return result + ")"
 }
 
-func (self *IfStmnt) Eval(env environment.Environment) interface{} {
+func (self *IfStmnt) Eval(env environment.Environment, args... interface{}) interface{} {
 	c := self.Condition().Eval(env)
 	if reflect.TypeOf(c).Kind() == reflect.Int && c.(int) == 1 {
 		return self.ThenBlock().Eval(env)

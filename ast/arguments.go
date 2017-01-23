@@ -10,10 +10,24 @@ func NewArguments(list []ASTree) *Arguments {
 	return &Arguments{astList{list}}
 }
 
-func (self *Arguments) Size(i int) int {
+func (self *Arguments) Size() int {
 	return self.NumChildren()
 }
 
-func (self *Arguments) Eval(env environment.Environment) interface{} {
+func (self *Arguments) Eval(callerEnv environment.Environment, args... interface{}) interface{} {
+	fnc, ok := args[0].(*Function)
+	if !ok {
+		panic("bad function")
+	}
+	params := fnc.Parameters()
+	if params.Size() != self.Size() {
+		panic("bad number of arguments")
+	}
 
+	newEnv := fnc.MakeEnv()
+	newEnv.SetOuter(callerEnv)
+	for num, a := range self.Children() {
+		params.Eval(newEnv, num, a.Eval(callerEnv))
+	}
+	return fnc.Body().Eval(newEnv)
 }

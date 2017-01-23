@@ -17,6 +17,6 @@ func (self *StringLiteral) Value() string {
 	return self.Token().GetText()
 }
 
-func (self *StringLiteral) Eval(env environment.Environment) interface{} {
+func (self *StringLiteral) Eval(env environment.Environment, args... interface{}) interface{} {
 	return self.Value()
 }

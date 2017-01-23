@@ -16,5 +16,5 @@ type ASTree interface {
 	Location() string
 	String() string
 
-	Eval(env environment.Environment) interface{}
+	Eval(env environment.Environment, args... interface{}) interface{}
 }

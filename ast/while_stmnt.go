@@ -26,7 +26,7 @@ func (self *WhileStmnt) String() string {
 	return "(while " + self.Condition().String() + " " + b.String() + ")"
 }
 
-func (self *WhileStmnt) Eval(env environment.Environment) interface{} {
+func (self *WhileStmnt) Eval(env environment.Environment, args... interface{}) interface{} {
 	var result interface{}
 	for true {
 		c := self.Condition().Eval(env)

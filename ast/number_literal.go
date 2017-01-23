@@ -17,6 +17,6 @@ func (self *NumberLiteral) Value() int {
 	return self.token.GetNumber()
 }
 
-func (self *NumberLiteral) Eval(env environment.Environment) interface{} {
+func (self *NumberLiteral) Eval(env environment.Environment, args... interface{}) interface{} {
 	return self.Value()
 }

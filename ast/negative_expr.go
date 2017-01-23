@@ -21,7 +21,7 @@ func (self *NegativeExpr) String() string {
 	return fmt.Sprintf("(-%v)", self.Operand())
 }
 
-func (self *NegativeExpr) Eval(env environment.Environment) interface{} {
+func (self *NegativeExpr) Eval(env environment.Environment, args... interface{}) interface{} {
 	v := self.Operand().Eval(env)
 	switch v.(type) {
 	case int:

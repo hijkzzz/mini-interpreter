@@ -50,6 +50,6 @@ func (self *astList) String() string {
 	return buf.String()
 }
 
-func (self *astList) Eval(env environment.Environment) interface{} {
+func (self *astList) Eval(env environment.Environment, args... interface{}) interface{} {
 	panic("cannot eval " + self.String())
 }

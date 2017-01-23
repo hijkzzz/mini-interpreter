@@ -264,6 +264,7 @@ func (self *Parser) params() ast.ASTree {
 	}
 
 	for self.isToken(",") {
+		self.lexer.Read()
 		if self.testParams() {
 			list = append(list, ast.NewName(self.lexer.Read()))
 		} else {
@@ -314,6 +315,7 @@ func (self *Parser) args() ast.ASTree {
 	list := make([]ast.ASTree, 1)
 	list[0] = self.expr()
 	for self.isToken(",") {
+		self.lexer.Read()
 		list = append(list, self.expr())
 	}
 	return ast.NewArguments(list)
@@ -334,7 +336,7 @@ func (self *Parser) postfix() ast.ASTree {
 }
 
 func (self *Parser) testPostfix() bool {
-	self.isToken("(")
+	return self.isToken("(")
 }
 
 func (self *Parser) isToken(name string) bool{

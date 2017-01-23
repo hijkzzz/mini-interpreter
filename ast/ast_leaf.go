@@ -39,7 +39,7 @@ func (self *astLeaf) String() string {
 	return self.token.GetText()
 }
 
-func (self *astLeaf) Eval(env environment.Environment) interface{} {
+func (self *astLeaf) Eval(env environment.Environment, args... interface{}) interface{} {
 	panic("cannot eval " + self.String())
 }
 
