@@ -4,6 +4,10 @@ import (
 	"stone/environment"
 )
 
+/*
+	def 定义的函数信息
+ */
+
 type Function struct {
 	name string
 	parameters *ParameterList
@@ -24,7 +28,9 @@ func (self *Function) Body() *BlockStmnt {
 }
 
 func (self *Function) MakeEnv() environment.Environment {
-	return environment.NewNestedEnv()
+	e := environment.NewNestedEnv()
+	e.SetOuter(self.env)
+	return e
 }
 
 func (self *Function) String() string {

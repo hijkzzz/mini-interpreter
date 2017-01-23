@@ -25,7 +25,6 @@ func (self *Arguments) Eval(callerEnv environment.Environment, args... interface
 	}
 
 	newEnv := fnc.MakeEnv()
-	newEnv.SetOuter(callerEnv)
 	for num, a := range self.Children() {
 		params.Eval(newEnv, num, a.Eval(callerEnv))
 	}

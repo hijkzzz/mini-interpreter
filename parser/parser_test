@@ -19,3 +19,10 @@ def fib(n) {
     }
 }
 fib(10)
+
+def counter(c) {
+    func () {c = c + 1}
+}
+c1 = counter(1)
+c1()
+c1()

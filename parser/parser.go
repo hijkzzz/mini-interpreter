@@ -9,7 +9,7 @@ import (
 /*
 	Grammer Definition
 
-	primary : ( "(" expr ")" | NUMBER | ID [ postfix ] | STRING ) |
+	primary : ( "(" expr ")" | NUMBER | ID { postfix } | FUNC | STRING ) |
 	factor  : "-" primary | primary
 	expr 	: factor { OP factor }
 	block   : "{" [ statement ] { ( ";" | EOL ) [ statement ] } "}"
@@ -79,17 +79,19 @@ func NewParser(lexer *lexer.Lexer) *Parser {
 	return &Parser{lexer, reserved, operators}
 }
 
-func (self *Parser) primary() ast.ASTree{
+func (self *Parser) primary() ast.ASTree {
 	var a ast.ASTree
 
 	t := self.lexer.Read()
 	if t.IsIdentifier() && t.GetText() == "(" {
 		a = self.expr()
 		self.readToken(")")
+	} else if t.IsIdentifier() && t.GetText() == "func" {
+		a = ast.NewFunc([]ast.ASTree{self.paramList(), self.block()})
 	} else if self.isIdentifier(t) {
 		a = ast.NewName(t)
 		if self.testPostfix() {
-			return ast.NewCallFunc([]ast.ASTree{a, self.postfix()})
+			return ast.NewCall([]ast.ASTree{a, self.postfix()})
 		}
 	} else if t.IsString() {
 		a = ast.NewStringLiteral(t)
