@@ -5,7 +5,7 @@ import (
 )
 
 /*
-	def 定义的函数信息
+	自定义的函数信息
  */
 
 type Function struct {

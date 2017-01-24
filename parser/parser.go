@@ -91,7 +91,11 @@ func (self *Parser) primary() ast.ASTree {
 	} else if self.isIdentifier(t) {
 		a = ast.NewName(t)
 		if self.testPostfix() {
-			return ast.NewCall([]ast.ASTree{a, self.postfix()})
+			list := []ast.ASTree{a, self.postfix()}
+			for self.testPostfix() {
+				list = append(list, self.postfix())
+			}
+			a = ast.NewCall(list)
 		}
 	} else if t.IsString() {
 		a = ast.NewStringLiteral(t)

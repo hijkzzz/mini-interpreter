@@ -5,8 +5,7 @@ import (
 )
 
 /*
-	抽象语法树节点
-	astree, ast_list, ast_leaf 为抽象类
+	抽象语法树接口
  */
 
 type ASTree interface {

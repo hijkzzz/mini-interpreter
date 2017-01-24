@@ -5,7 +5,7 @@ import (
 )
 
 /*
-	抽象语法树——匿名函数节点
+	抽象语法树——匿名函数
  */
 
 type Func struct {

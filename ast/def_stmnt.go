@@ -28,5 +28,5 @@ func (self *DefStmnt) String() string {
 
 func (self *DefStmnt) Eval(env environment.Environment, args... interface{}) interface{} {
 	env.SetNew(self.Name(), NewFunction(self.Name(), self.Parameters(), self.Body(), env))
-	return self.Name()
+	return "<def " + self.Name() + ">"
 }

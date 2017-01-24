@@ -5,7 +5,8 @@ import (
 )
 
 /*
-	抽象语法树——函数调用节点
+	抽象语法树——函数调用
+	例如 test()()
  */
 
 type Call struct {
@@ -20,10 +21,16 @@ func (self *Call) Name() string {
 	return self.Child(0).(*Name).Token().GetText()
 }
 
-func (self *Call) Arguments() *Arguments {
-	return self.Child(1).(*Arguments)
+func (self *Call) HasPostfix(index int) bool {
+	return self.NumChildren() - index > 0
 }
 
 func (self *Call) Eval(env environment.Environment, args... interface{}) interface{} {
-	return self.Arguments().Eval(env, env.Get(self.Name()))
+	result := self.Child(1).Eval(env, env.Get(self.Name()))
+
+	for index := 2; self.HasPostfix(index); index++ {
+		args := self.Child(index).(*Arguments)
+		result = args.Eval(env, result)
+	}
+	return result
 }

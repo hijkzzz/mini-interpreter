@@ -6,6 +6,10 @@ import (
 	"strconv"
 )
 
+/*
+	抽象语法树——双目表达式
+ */
+
 type BinaryExpr struct {
 	astList
 }

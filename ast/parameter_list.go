@@ -2,6 +2,10 @@ package ast
 
 import "stone/environment"
 
+/*
+	抽象语法树——函数定义参数列表
+ */
+
 type ParameterList struct {
 	astList
 }

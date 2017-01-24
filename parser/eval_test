@@ -28,9 +28,9 @@ def fib(n) {
 "fib(10) == " + fib(10)
 
 // 闭包
-def counter(c) {
-    func () { c = c + 1 }
+def add(c) {
+    func (x) { c = c + x }
 }
-c1 = counter(1)
-c1()
-c1()
+add(1)(10)
+c1 = add(1)
+c1(2)
