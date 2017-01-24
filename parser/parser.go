@@ -62,6 +62,7 @@ func NewParser(lexer *lexer.Lexer) *Parser {
 		"else" : true,
 		"while" : true,
 		"def" : true,
+		"func": true,
 		token.EOL : true,
 	}
 
@@ -88,7 +89,7 @@ func (self *Parser) primary() ast.ASTree {
 		self.readToken(")")
 	} else if t.IsIdentifier() && t.GetText() == "func" {
 		a = ast.NewFunc([]ast.ASTree{self.paramList(), self.block()})
-	} else if self.isIdentifier(t) {
+	} else if self.notReserved(t) {
 		a = ast.NewName(t)
 		if self.testPostfix() {
 			list := []ast.ASTree{a, self.postfix()}
@@ -110,7 +111,8 @@ func (self *Parser) primary() ast.ASTree {
 
 func (self *Parser) testPrimary() bool {
 	t := self.lexer.Peek(0)
-	if t.IsIdentifier() && !self.isIdentifier(t) {
+	// 如果是保留关键字（除了 func）返回 false
+	if t.IsIdentifier()  && !self.notReserved(t) && t.GetText() != "func" {
 		return false
 	}
 	return true
@@ -282,7 +284,7 @@ func (self *Parser) params() ast.ASTree {
 }
 
 func (self *Parser) testParams() bool {
-	return self.isIdentifier(self.lexer.Peek(0))
+	return self.notReserved(self.lexer.Peek(0))
 }
 
 func (self *Parser) paramList() ast.ASTree {
@@ -302,7 +304,7 @@ func (self *Parser) testParamList() bool {
 func (self *Parser) def() ast.ASTree {
 	self.readToken("def")
 	list := make([]ast.ASTree, 3)
-	if self.isIdentifier(self.lexer.Peek(0)) {
+	if self.notReserved(self.lexer.Peek(0)) {
 		list[0] = ast.NewName(self.lexer.Read())
 		list[1] = self.paramList()
 		list[2] = self.block()
@@ -357,7 +359,7 @@ func (self *Parser) readToken(name string) {
 	}
 }
 
-func (self *Parser) isIdentifier(t token.Token) bool {
+func (self *Parser) notReserved(t token.Token) bool {
 	if t.IsIdentifier() {
 		_, ok := self.reserved[t.GetText()]
 		if ok {

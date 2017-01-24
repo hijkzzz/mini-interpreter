@@ -30,7 +30,7 @@ func Test_Eval(t *testing.T) {
 
 	l := lexer.NewLexer(fin)
 	p := NewParser(l)
-	e := environment.NewNestedEnv()
+	e := environment.NewNativeEnv()
 	for l.Peek(0) != token.EOF {
 		program := p.program()
 		result := program.Eval(e)

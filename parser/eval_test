@@ -34,3 +34,9 @@ def add(c) {
 add(1)(10)
 c1 = add(1)
 c1(2)
+
+// 内置函数
+size("test")
+"print return " + itoa(print("Hello " + "World!\n"))
+timestamp()
+atoi("12345")
