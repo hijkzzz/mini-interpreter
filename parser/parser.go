@@ -4,12 +4,15 @@ import (
 	"stone/lexer"
 	"stone/token"
 	"stone/ast"
+	"debug/elf"
+	"testing"
 )
 
 /*
 	Grammer Definition
 
-	primary : ( "(" expr ")" | NUMBER | ID { postfix } | FUNC | STRING ) |
+	// basic
+	primary : ( "[" elements ]" | "(" expr ")" | NUMBER | IDENTIFIER { postfix } | FUNC | STRING )
 	factor  : "-" primary | primary
 	expr 	: factor { OP factor }
 	block   : "{" [ statement ] { ( ";" | EOL ) [ statement ] } "}"
@@ -17,14 +20,23 @@ import (
 	statement : "if" expr block [ "else" block ]
 		| "while" expr block
 		| simple
-	program : [ def | statement ] ( ";" | EOL )
+	program : [ def | defclass | statement ] ( ";" | EOL )
 
+	// func
 	parm 	: IDENTIFIER
 	params  : param { "," param }
-	param_list : "(" [param] ")"
+	param_list : "(" [ param ] ")"
 	def 	: "def" IDENTIFIER param_list block
 	args    : expr { "," expr }
-	postfix : "(" [ args ] ")"
+	postfix : "(" [ args ] ")" | "." IDENTIFIER | "[" expr "]"
+
+	// class
+	member  : def | simple
+	class_body : "{" [ member ] { ( ";" | EOL ) [ member ] "}"
+	defclass : "class" IDENTIFIER [ "extends" IDENTIFIER ] class_body
+
+	// array
+	elements: expr { "," expr }
 */
 
 type Precedence struct {
@@ -43,6 +55,7 @@ type Parser struct {
 }
 
 func NewParser(lexer *lexer.Lexer) *Parser {
+	// 用于识别 IDENTIFIER
 	reserved := map[string]bool {
 		";" : true,
 		"}" : true,
@@ -63,6 +76,10 @@ func NewParser(lexer *lexer.Lexer) *Parser {
 		"while" : true,
 		"def" : true,
 		"func": true,
+		"[" : true,
+		"]" : true,
+		"class" : true,
+		"." : true,
 		token.EOL : true,
 	}
 
@@ -80,30 +97,34 @@ func NewParser(lexer *lexer.Lexer) *Parser {
 	return &Parser{lexer, reserved, operators}
 }
 
+// primary type
 func (self *Parser) primary() ast.ASTree {
 	var a ast.ASTree
 
 	t := self.lexer.Read()
 	if t.IsIdentifier() && t.GetText() == "(" {
 		a = self.expr()
-		self.readToken(")")
+		self.readMatchToken(")")
 	} else if t.IsIdentifier() && t.GetText() == "func" {
 		a = ast.NewFunc([]ast.ASTree{self.paramList(), self.block()})
-	} else if self.notReserved(t) {
+	} else if t.IsIdentifier() && t.GetText() == "[" {
+		a = ast.NewArrayRef([]ast.ASTree{self.elements()})
+		self.readMatchToken("]")
+	} else if self.isName(t) {
 		a = ast.NewName(t)
 		if self.testPostfix() {
 			list := []ast.ASTree{a, self.postfix()}
 			for self.testPostfix() {
 				list = append(list, self.postfix())
 			}
-			a = ast.NewCall(list)
+			a = ast.NewPrimary(list)
 		}
 	} else if t.IsString() {
 		a = ast.NewStringLiteral(t)
 	} else if t.IsNumber() {
 		a = ast.NewNumberLiteral(t)
 	} else {
-		panic("parser error at line " + self.lexer.GetLineNumber())
+		panic("line " + self.lexer.GetLineNumber() + " -- error" + t.GetText())
 	}
 
 	return a
@@ -111,11 +132,16 @@ func (self *Parser) primary() ast.ASTree {
 
 func (self *Parser) testPrimary() bool {
 	t := self.lexer.Peek(0)
-	// 如果是保留关键字（除了 func）返回 false
-	if t.IsIdentifier()  && !self.notReserved(t) && t.GetText() != "func" {
+	if t.IsNumber() || t.IsString() {
+		return true
+	} else if t.IsIdentifier() && (t.GetText() == "func" || t.GetText() == "[" || t.GetText() == "(") {
+		return true
+	} else if self.isName(t) {
+		return true
+	} else {
 		return false
 	}
-	return true
+
 }
 
 func (self *Parser) factor() ast.ASTree{
@@ -177,7 +203,7 @@ func (self *Parser) rightIsExpr(prec int, nextPrec *Precedence) bool {
 }
 
 func (self *Parser) block() ast.ASTree{
-	self.readToken("{")
+	self.readMatchToken("{")
 	list := make([]ast.ASTree, 0)
 	if self.testStatement() {
 		list = append(list, self.statement())
@@ -195,7 +221,7 @@ func (self *Parser) block() ast.ASTree{
 	if len(list) == 0 {
 		list = append(list, ast.NewNullStmnt([]ast.ASTree{}))
 	}
-	self.readToken("}")
+	self.readMatchToken("}")
 	return ast.NewBlockStmnt(list)
 }
 
@@ -231,7 +257,7 @@ func (self *Parser) statement() ast.ASTree{
 	} else if self.testSimple() {
 		return self.simple()
 	} else {
-		panic("parser error at line " + self.lexer.GetLineNumber())
+		panic("line " + self.lexer.GetLineNumber() + " -- not a statement ")
 	}
 }
 
@@ -247,6 +273,8 @@ func (self *Parser) program() ast.ASTree {
 		a = self.statement()
 	} else if self.isToken("def") {
 		a = self.def()
+	} else if self.isToken("class") {
+		a = self.defclass()
 	} else {
 		a = ast.NewNullStmnt([]ast.ASTree{})
 	}
@@ -254,13 +282,13 @@ func (self *Parser) program() ast.ASTree {
 	if self.isToken(";") || self.isToken(token.EOL) {
 		self.lexer.Read()
 	} else {
-		panic("parser error at line " + self.lexer.GetLineNumber())
+		panic("line " + self.lexer.GetLineNumber() + " -- lack of end symbol")
 	}
 	return a
 }
 
 func (self *Parser) testProgram() bool {
-	return self.isToken("def") || self.testStatement()
+	return self.isToken("def") || self.isToken("class") || self.testStatement()
 }
 
 func (self *Parser) params() ast.ASTree {
@@ -268,7 +296,7 @@ func (self *Parser) params() ast.ASTree {
 	if self.testParams() {
 		list = append(list, ast.NewName(self.lexer.Read()))
 	} else {
-		panic("parser error at line " + self.lexer.GetLineNumber())
+		panic("line " + self.lexer.GetLineNumber() + " -- not param " + self.lexer.Peek(0).GetText())
 	}
 
 	for self.isToken(",") {
@@ -276,7 +304,7 @@ func (self *Parser) params() ast.ASTree {
 		if self.testParams() {
 			list = append(list, ast.NewName(self.lexer.Read()))
 		} else {
-			panic("parser error at line " + self.lexer.GetLineNumber())
+			panic("line " + self.lexer.GetLineNumber() + " -- not param " + self.lexer.Peek(0).GetText())
 		}
 	}
 
@@ -284,16 +312,16 @@ func (self *Parser) params() ast.ASTree {
 }
 
 func (self *Parser) testParams() bool {
-	return self.notReserved(self.lexer.Peek(0))
+	return self.isName(self.lexer.Peek(0))
 }
 
 func (self *Parser) paramList() ast.ASTree {
-	self.readToken("(")
+	self.readMatchToken("(")
 	var a ast.ASTree = ast.NewParameterList(nil)
 	if self.testParams() {
 		a = self.params()
 	}
-	self.readToken(")")
+	self.readMatchToken(")")
 	return a
 }
 
@@ -302,14 +330,14 @@ func (self *Parser) testParamList() bool {
 }
 
 func (self *Parser) def() ast.ASTree {
-	self.readToken("def")
+	self.readMatchToken("def")
 	list := make([]ast.ASTree, 3)
-	if self.notReserved(self.lexer.Peek(0)) {
+	if self.isName(self.lexer.Peek(0)) {
 		list[0] = ast.NewName(self.lexer.Read())
 		list[1] = self.paramList()
 		list[2] = self.block()
 	} else {
-		panic("parser error at line " + self.lexer.GetLineNumber())
+		panic("line " + self.lexer.GetLineNumber() + " -- not identifer " + self.lexer.Peek(0).GetText())
 	}
 
 	return ast.NewDefStmnt(list)
@@ -333,33 +361,128 @@ func (self *Parser) testArgs() bool {
 	return self.testExpr()
 }
 
+// postfix : "(" [ args ] ")" | "." IDENTIFIER | "[" expr "]"
 func (self *Parser) postfix() ast.ASTree {
-	self.readToken("(")
-	var a ast.ASTree = ast.NewArguments(nil)
-	if self.testArgs() {
-		a = self.args()
+	if self.isToken("(") {
+		self.lexer.Read()
+		var a ast.ASTree = ast.NewArguments(nil)
+		if self.testArgs() {
+			a = self.args()
+		}
+		self.readMatchToken(")")
+		return a
+	} else if self.isToken(".") {
+		self.lexer.Read()
+		var a ast.ASTree
+		if self.isName(self.lexer.Peek(0)) {
+			a = ast.NewDot([]ast.ASTree{ast.NewName(self.lexer.Read())})
+		} else {
+			panic("line " + self.lexer.GetLineNumber() + " -- not obj member " +
+				self.lexer.Peek(0).GetText())
+		}
+		return a
+	} else if self.isToken("[") {
+		self.lexer.Read()
+		var a ast.ASTree = self.expr()
+		self.readMatchToken("]")
+		return a
+	} else {
+		panic("line " + self.lexer.GetLineNumber() + " -- not postfix " + self.lexer.Peek(0).GetText())
 	}
-	self.readToken(")")
-	return a
 }
 
 func (self *Parser) testPostfix() bool {
-	return self.isToken("(")
+	return self.isToken("(") || self.isToken(".") || self.isToken("[")
 }
+
+func (self *Parser) member() ast.ASTree {
+	if self.testDef() {
+		return self.def()
+	} else if self.testSimple() {
+		return self.simple()
+	} else {
+		panic("line" + self.lexer.GetLineNumber() + " -- not class member " + self.lexer.Peek(0).GetText())
+	}
+}
+
+func (self *Parser) testMember() bool {
+	return self.testDef() || self.testSimple()
+}
+
+func (self *Parser) classBody() ast.ASTree {
+	self.readMatchToken("{")
+	list := make([]ast.ASTree, 0)
+	if self.testMember() {
+		list = append(list, self.member())
+	}
+	for self.isToken(";") || self.isToken(token.EOL) {
+		self.lexer.Read()
+		list = append(list, self.member())
+	}
+	self.readMatchToken("}")
+
+	return ast.NewClassBody(list)
+}
+
+func (self *Parser) testClassBody() bool {
+	return self.isToken("{")
+}
+
+func (self *Parser) defclass() ast.ASTree {
+	self.readMatchToken("class")
+	list := make([]ast.ASTree, 2, 3)
+	if self.isName(self.lexer.Peek(0)) {
+		list[0] = ast.NewName(self.lexer.Read())
+	} else {
+		panic("line" + self.lexer.GetLineNumber() + " -- class name error")
+	}
+
+	if self.isToken("extends") {
+		self.lexer.Read()
+		if self.isName(self.lexer.Peek(0)) {
+			list = append(list, ast.NewName(self.lexer.Read()))
+		} else {
+			panic("line" + self.lexer.GetLineNumber() + " -- extends error")
+		}
+	}
+
+	list[1] = self.classBody()
+	return ast.NewClassStmnt(list)
+}
+
+func (self *Parser) testDefclass() bool {
+	return self.isToken("class")
+}
+
+func (self *Parser) elements() ast.ASTree {
+	list := make([]ast.ASTree, 1)
+	list[0] = self.expr()
+	for self.isToken(",") {
+		self.lexer.Read()
+		list = append(list, self.expr())
+	}
+	return ast.NewArrayLiteral(list)
+}
+
+func (self *Parser) testElements() bool {
+	return self.testExpr()
+}
+
+// helper function
 
 func (self *Parser) isToken(name string) bool{
 	t := self.lexer.Peek(0)
 	return t.IsIdentifier() && name == t.GetText()
 }
 
-func (self *Parser) readToken(name string) {
+func (self *Parser) readMatchToken(name string) {
 	t := self.lexer.Read()
 	if !(t.IsIdentifier() && name == t.GetText()) {
 		panic("parser error at line " + self.lexer.GetLineNumber())
 	}
 }
 
-func (self *Parser) notReserved(t token.Token) bool {
+func (self *Parser) isName(t token.Token) bool {
 	if t.IsIdentifier() {
 		_, ok := self.reserved[t.GetText()]
 		if ok {

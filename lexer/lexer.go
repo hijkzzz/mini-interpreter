@@ -66,7 +66,7 @@ func (self *Lexer) readLine() {
 		groups := self.pattern.FindStringSubmatch(line)
 		for len(line) > 0 {
 			if (groups == nil) {
-				panic("lexer error at line " + strconv.Itoa(self.lineNo))
+				panic("lexer error at line " + strconv.Itoa(self.lineNo) + " " + line)
 			}
 			self.addToken(groups)
 			line = line[len(groups[0]):]
