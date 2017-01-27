@@ -4,10 +4,6 @@ import (
 	"stone/environment"
 )
 
-/*
-	用户自定义函数
- */
-
 type Function struct {
 	name string
 	parameters *ParameterList

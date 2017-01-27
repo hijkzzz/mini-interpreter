@@ -17,15 +17,23 @@ func (self *Primary) Name() string {
 }
 
 func (self *Primary) HasPostfix(index int) bool {
-	return self.NumChildren() - index > 0
+	return index < self.NumChildren()
 }
 
 func (self *Primary) Eval(env environment.Environment, args... interface{}) interface{} {
-	result := self.Child(1).Eval(env, env.Get(self.Name()))
+	result := self.Child(0).(*Name).Eval(env)
 
-	for index := 2; self.HasPostfix(index); index++ {
-		args := self.Child(index).(*Arguments)
-		result = args.Eval(env, result)
+	for index := 1; self.HasPostfix(index); index++ {
+		a := self.Child(index)
+		if args, ok := a.(Arguments); ok {
+			result = args.Eval(env, result)
+		} else if dot, ok := a.(Dot); ok {
+			result = dot.Eval(env, result)
+		} else if arrref, ok := a.(ArrayRef); ok{
+			
+		} else {
+			panic("error postfix")
+		}
 	}
 	return result
 }

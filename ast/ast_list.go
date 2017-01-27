@@ -5,9 +5,6 @@ import (
 	"stone/environment"
 )
 
-/*
-	抽象语法树——非叶节点基类
- */
 type ASTList interface {
 	ASTree
 }

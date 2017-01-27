@@ -1,5 +1,7 @@
 package ast
 
+import "stone/environment"
+
 type ClassStmnt struct {
 	astList
 }
@@ -14,7 +16,7 @@ func (self *ClassStmnt) Name() string {
 
 func (self *ClassStmnt) SuperClass() string {
 	if self.NumChildren() < 3 {
-		return "*"
+		return ""
 	} else {
 		return self.Child(1).(*Name).token.GetText()
 	}
@@ -26,4 +28,10 @@ func (self *ClassStmnt) Body() *ClassBody {
 
 func (self *ClassStmnt) String() string {
 	return "(class " + self.Name() + " " + self.SuperClass() + " " + self.Body().String() + ")"
+}
+
+func (self *ClassStmnt) Eval(env environment.Environment, args... interface{}) interface{} {
+	ci := NewClassInfo(self, env)
+	env.Set(self.Name(), ci)
+	return self.Name()
 }

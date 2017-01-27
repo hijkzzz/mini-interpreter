@@ -5,10 +5,6 @@ import (
 	"reflect"
 )
 
-/*
-	抽象语法树——函数调用参数
- */
-
 type Arguments struct {
 	astList
 }

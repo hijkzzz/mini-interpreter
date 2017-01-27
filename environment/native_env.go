@@ -10,10 +10,14 @@ import (
 	"reflect"
 )
 
-func NewNativeEnv() Environment {
+type NativeEnv struct {
+	*NestedEnv
+}
+
+func NewNativeEnv() *NativeEnv {
 	env := NewNestedEnv()
 	appendNatives(env)
-	return env
+	return &NativeEnv{env}
 }
 
 func appendNatives(env Environment) {
@@ -30,7 +34,6 @@ func append1(env Environment, name string, fun interface{}) {
 }
 
 // native methods
-// 必须只有一个返回值
 
 var scanner *bufio.Scanner = bufio.NewScanner(os.Stdin)
 func read() string {
@@ -64,7 +67,6 @@ func itoa(i int) string {
 	return x
 }
 
-// 简化设计不使用 int64
 func timestamp() int {
 	return int(time.Now().Unix())
 }

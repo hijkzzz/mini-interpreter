@@ -4,8 +4,6 @@ import (
 	"stone/lexer"
 	"stone/token"
 	"stone/ast"
-	"debug/elf"
-	"testing"
 )
 
 /*
@@ -55,7 +53,6 @@ type Parser struct {
 }
 
 func NewParser(lexer *lexer.Lexer) *Parser {
-	// 用于识别 IDENTIFIER
 	reserved := map[string]bool {
 		";" : true,
 		"}" : true,
@@ -385,7 +382,7 @@ func (self *Parser) postfix() ast.ASTree {
 		self.lexer.Read()
 		var a ast.ASTree = self.expr()
 		self.readMatchToken("]")
-		return a
+		return ast.NewArrayRef([]ast.ASTree{a})
 	} else {
 		panic("line " + self.lexer.GetLineNumber() + " -- not postfix " + self.lexer.Peek(0).GetText())
 	}

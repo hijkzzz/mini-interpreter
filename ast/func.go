@@ -4,10 +4,6 @@ import (
 	"stone/environment"
 )
 
-/*
-	抽象语法树——匿名函数
- */
-
 type Func struct {
 	astList
 }

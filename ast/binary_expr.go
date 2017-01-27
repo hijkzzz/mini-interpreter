@@ -2,13 +2,9 @@ package ast
 
 import (
 	"reflect"
-	"stone/environment"
 	"strconv"
+	"stone/environment"
 )
-
-/*
-	抽象语法树——双目表达式
- */
 
 type BinaryExpr struct {
 	astList
@@ -48,14 +44,26 @@ func (self *BinaryExpr) Eval(env environment.Environment, args... interface{}) i
 }
 
 func (self *BinaryExpr) computeAssign(env environment.Environment, right interface{}) interface{} {
-	// = 左边必须是变量名
-	l, ok := self.Left().(*Name)
-	if ok {
-		env.Set(l.Name(), right)
+	left := self.Left()
+
+	if name, ok := left.(*Name); ok {
+		env.Set(name.Name(), right)
 		return right
+	} else if primary, ok := left.(*Primary); ok{
+		if primary.HasPostfix(1) {
+			if dot, ok := primary.Child(1).(Dot); ok {
+				env.Get()
+			}
+		}
 	} else {
-		panic("bad assignment")
+		panic("not left value")
 	}
+}
+
+func (self *BinaryExpr) setField(obj *StoneObject, expr *Dot, rvalue interface{}) interface{} {
+	name := expr.Name()
+	obj.Write(name, rvalue)
+	return rvalue
 }
 
 func (self *BinaryExpr) computeOp(left interface{}, op string, right interface{}) interface{} {

@@ -4,10 +4,6 @@ import (
 	"stone/environment"
 )
 
-/*
-	抽象语法树接口
- */
-
 type ASTree interface {
 	Child(i int) ASTree
 	Children() []ASTree
