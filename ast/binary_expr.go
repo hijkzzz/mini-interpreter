@@ -50,10 +50,22 @@ func (self *BinaryExpr) computeAssign(env environment.Environment, right interfa
 		env.Set(name.Name(), right)
 		return right
 	} else if primary, ok := left.(*Primary); ok{
-		if primary.HasPostfix(1) {
-			if dot, ok := primary.Child(1).(Dot); ok {
-				env.Get()
+		obj := primary.Eval2(1, env)
+		if so, ok := obj.(*StoneObject); ok {
+			dot := primary.Child(primary.NumChildren() - 1).(*Dot)
+			so.Write(dot.Name(), right)
+			return right
+		} else if arr, ok := obj.([]interface{}); ok {
+			arrref := primary.Child(primary.NumChildren() - 1).(*ArrayRef)
+			index := arrref.Index().Eval(env).(int)
+			if index >= 0 && index < len(arr) {
+				arr[index] = right
+				return right
+			} else {
+				panic("index out of range")
 			}
+		} else {
+			panic("not left value")
 		}
 	} else {
 		panic("not left value")

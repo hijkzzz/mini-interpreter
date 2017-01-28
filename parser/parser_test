@@ -25,4 +25,19 @@ def counter(c) {
 }
 c1 = counter(1)
 c1()
-c1()
+counter(2)()
+
+class Animal {
+    age = 0
+    weight = 0
+}
+
+class Dog extends Animal {
+    def spark() {
+        "wang wang"
+    }
+}
+
+a = [1, 2, 3, 4, 5]
+a[1] = 2
+a[1]

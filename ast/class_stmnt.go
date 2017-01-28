@@ -18,7 +18,7 @@ func (self *ClassStmnt) SuperClass() string {
 	if self.NumChildren() < 3 {
 		return ""
 	} else {
-		return self.Child(1).(*Name).token.GetText()
+		return self.Child(2).(*Name).token.GetText()
 	}
 }
 

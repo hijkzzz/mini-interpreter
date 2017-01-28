@@ -216,7 +216,7 @@ func (self *Parser) block() ast.ASTree{
 	}
 
 	if len(list) == 0 {
-		list = append(list, ast.NewNullStmnt([]ast.ASTree{}))
+		list = append(list, ast.NewNullStmnt())
 	}
 	self.readMatchToken("}")
 	return ast.NewBlockStmnt(list)
@@ -273,7 +273,7 @@ func (self *Parser) program() ast.ASTree {
 	} else if self.isToken("class") {
 		a = self.defclass()
 	} else {
-		a = ast.NewNullStmnt([]ast.ASTree{})
+		a = ast.NewNullStmnt()
 	}
 
 	if self.isToken(";") || self.isToken(token.EOL) {
@@ -414,7 +414,12 @@ func (self *Parser) classBody() ast.ASTree {
 	}
 	for self.isToken(";") || self.isToken(token.EOL) {
 		self.lexer.Read()
-		list = append(list, self.member())
+		if self.testMember() {
+			list = append(list, self.member())
+		}
+	}
+	if len(list) == 0 {
+		list = append(list, ast.NewNullStmnt())
 	}
 	self.readMatchToken("}")
 

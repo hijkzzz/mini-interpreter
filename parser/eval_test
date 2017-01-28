@@ -42,3 +42,22 @@ size("test")
 "print return " + itoa(print("Hello " + "World!\n"))
 timestamp()
 atoi("12345")
+
+class Animal {
+    age = 0
+    weight = 0
+}
+
+class Dog extends Animal {
+    def info() {
+        "age = " + age + "; weight = " + weight
+    }
+}
+
+d = Dog.new
+d.age = 1
+d.info()
+
+a = [1, 2, 3, 4, 5]
+a[1] = 2
+a[1]

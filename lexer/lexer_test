@@ -5,5 +5,15 @@ abc 12fdasfa3
 "123123asdbd1"
 
 func add(int x, int y) {
-    return x + y
+    x + y
+}
+
+class Animal {
+    age = 0
+}
+
+class Dog extends Animal {
+    def spark() {
+        "wang wang"
+    }
 }
