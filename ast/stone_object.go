@@ -14,7 +14,7 @@ func NewStoneObject(e environment.Environment) *StoneObject {
 }
 
 func (self *StoneObject) String() string {
-	return fmt.Sprintf("<object %v>", self)
+	return fmt.Sprintf("<object %p>", self)
 }
 
 func (self *StoneObject) Read(name string) interface{} {

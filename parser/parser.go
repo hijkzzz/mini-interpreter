@@ -105,7 +105,7 @@ func (self *Parser) primary() ast.ASTree {
 	} else if t.IsIdentifier() && t.GetText() == "func" {
 		a = ast.NewFunc([]ast.ASTree{self.paramList(), self.block()})
 	} else if t.IsIdentifier() && t.GetText() == "[" {
-		a = ast.NewArrayRef([]ast.ASTree{self.elements()})
+		a = self.elements()
 		self.readMatchToken("]")
 	} else if self.isName(t) {
 		a = ast.NewName(t)

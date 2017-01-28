@@ -25,7 +25,7 @@ func (self *ArrayRef) Eval(env environment.Environment, args... interface{}) int
 	if value, ok := args[0].([]interface{}); ok {
 		index := self.Index().Eval(env)
 		if reflect.TypeOf(index).Kind() == reflect.Int && index.(int) >= 0 && index.(int) < len(value){
-			return value[index.(int)]
+			return (value)[index.(int)]
 		} else {
 			panic("bad index")
 		}
