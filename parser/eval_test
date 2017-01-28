@@ -43,6 +43,12 @@ size("test")
 timestamp()
 atoi("12345")
 
+a = [1, 2, 3, 4, 5]
+a[1] = 2
+a[1]
+a[0]
+a[4]
+
 class Animal {
     age = 0
     weight = 100
@@ -69,10 +75,7 @@ d.info()
 d.weight
 d.father()
 
-a = [1, 2, 3, 4, 5]
-a[1] = 2
-a[1]
-a[0]
-a[4]
-
 d.c
+d.info
+
+c = d
