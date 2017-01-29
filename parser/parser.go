@@ -94,6 +94,10 @@ func NewParser(lexer *lexer.Lexer) *Parser {
 	return &Parser{lexer, reserved, operators}
 }
 
+func (self *Parser) Parse() ast.ASTree {
+	return self.program()
+}
+
 // primary type
 func (self *Parser) primary() ast.ASTree {
 	var a ast.ASTree

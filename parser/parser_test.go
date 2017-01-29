@@ -23,7 +23,7 @@ func Test_Parser(t *testing.T) {
 }
 
 func Test_Eval(t *testing.T) {
-	fin, err := os.Open("eval_test")
+	fin, err := os.Open("test")
 	if err != nil {
 		panic(err)
 	}

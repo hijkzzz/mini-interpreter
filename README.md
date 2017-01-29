@@ -32,7 +32,7 @@ function 		A function type denotes the set of all functions with the same parame
 array			An array is a numbered sequence of elements of a single type
 				a = [1, 2, 3, 4, 5]
 
-object			See "OOP"
+object			See "Object Oriented Programming"
 ```
 
 ### Operators
@@ -65,7 +65,31 @@ while			while a > b {
 				}
 ```
 
-### OOP
+### Clousure
+
+```
+def add(c) {
+	func(x) {c + x}
+}
+
+c1 = add(1)
+print(c1(2))
+print("\n")
+print(c1(1))
+
+Output:
+3
+4
+```
+
+### Parameter Passing
+
+```
+The base data type is passed as a value
+Arrays and objects are passed as references
+```
+
+### Object Oriented Programming
 
 ```
 class			def Animal {
@@ -87,21 +111,39 @@ class			def Animal {
 				
 				d = Dog.new
 				d.sex = "boy"
-				d.getSex()
+				print(d.getAge())
+				print("\n")
+				print(d.getSex())
 				
-				Output
+				Output:
+				"Dog age == 0"
 				"Dog sex == boy"
 ```
 
+### Built-in functions
 
-
-
-## Build 
+```
+read() string				Read a word from terminal
+print(any[any type]) int	Show "any" in terminal
+size(s[string])	int			Return length of string
+atoi(s[string]) int			Convert string to int
+itoa(i[int]) string			Convert int to string
+timestamp() int				Return UNIX timpstamp
 ```
 
+## Requirement
+
+* Go
+
+## Build 
+
+```
+cp -r stone $GOPATH/src
+cd $GOPATH/src/stone
+go build
 ```
 
 ## Usage
 ```
-
+stone [source file name]
 ```
