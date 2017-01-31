@@ -145,5 +145,5 @@ go build
 
 ## Usage
 ```
-stone [source file name]
+./stone [source file name]
 ```

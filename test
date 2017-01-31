@@ -1,4 +1,4 @@
-// 循环判断
+// 分支条件
 even = 0
 odd = 0
 sum = 0
@@ -55,6 +55,7 @@ print("\n")
 print(atoi("12345"))
 print("\n")
 
+// 数组
 print(a = [1, 2, 3, 4, 5])
 print("\n")
 a[1] = 2
@@ -63,6 +64,7 @@ print("\n")
 a[0]
 a[4]
 
+// 类
 class Animal {
     age = 0
     weight = 100
@@ -77,6 +79,7 @@ class Animal {
     }
 }
 
+// 继承
 class Dog extends Animal {
     def info() {
         "age = " + age + "; weight = " + weight
@@ -100,3 +103,8 @@ print(d)
 print("\n")
 print(c)
 print("\n")
+
+// 终端输入
+while 1 {
+    print(read())
+}
