@@ -48,6 +48,8 @@ object			See "Object Oriented Programming"
 <				Only integer types are supported
 
 ==				Returns true if the variable name points to the same object
+                If operands are the basic data type, it depends on whether the values are equal or not
+
 =				Initialize the variable
 ```
 
