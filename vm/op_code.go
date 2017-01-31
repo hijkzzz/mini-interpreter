@@ -1,5 +1,6 @@
 package vm
 
+
 const (
 	NULL int8 = iota
 	ICONST

@@ -1,6 +1,6 @@
 package vm
 
 type HeapMemory interface{
-	read(index int) interface{}
-	write(index int, v interface{})
+	Read(index int) interface{}
+	Write(index int, v interface{})
 }
