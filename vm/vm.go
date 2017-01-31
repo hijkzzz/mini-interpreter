@@ -2,6 +2,10 @@ package vm
 
 import (
 	"unsafe"
+	"reflect"
+	"stone/environment"
+	"stone/ast"
+	"strconv"
 )
 
 /*
@@ -13,7 +17,7 @@ const (
 	NUM_OF_REG     = 6
 	SAVE_AREA_SIZE = NUM_OF_REG + 2
 	TRUE           = 1
-	FLASE          = 0
+	FALSE          = 0
 )
 
 type VM struct {
@@ -22,7 +26,7 @@ type VM struct {
 	strings []string
 	heap    HeapMemory
 
-	pc, fp, sp, ret int // fp frame pointer; sp stack pointer
+	pc, fp, sp, ret int // pc program counter; fp frame pointer; sp stack pointer; ret return value
 	registers       []interface{}
 }
 
@@ -45,6 +49,7 @@ func (self *VM) Run(entry int) {
 	self.pc = entry
 	self.fp = 0
 	self.sp = 0
+	self.ret = -1
 
 	for self.pc >= 0 {
 		self.mainLoop()
@@ -54,19 +59,51 @@ func (self *VM) Run(entry int) {
 func (self *VM) mainLoop() {
 	switch self.code[self.pc] {
 	case ICONST:
+		self.registers[decodeRegister(self.code[self.pc + 5])] = readInt(self.code, self.pc + 1)
+		self.pc += 6
 	case BCONST:
+		self.registers[decodeRegister(self.code[self.pc + 2])] = int(self.code[self.pc + 1])
+		self.pc += 3
 	case SCONST:
+		self.registers[decodeRegister(self.code[self.pc + 3])] =
+			self.strings[readShort(self.code, self.pc + 1)]
+		self.pc += 4
 	case MOVE:
+		self.moveValue()
 	case GMOVE:
+		self.moveHeapValue()
 	case IFZERO:
+		value := self.registers[decodeRegister(self.code[self.pc + 1])]
+		if i, ok := value.(int); ok && i == 0 {
+			self.pc += readShort(self.code, self.pc + 2)
+		} else {
+			self.pc += 4
+		}
 	case GOTO:
+		self.pc += readShort(self.code, self.pc + 1)
 	case CALL:
+		self.callFunction()
 	case RETURN:
+		self.pc = self.ret
 	case SAVE:
+		self.saveRegisters()
 	case RESTORE:
+		self.restoreRegisters()
 	case NEG:
+		reg := decodeRegister(self.code[self.pc + 1])
+		v := self.registers[reg]
+		if i, ok := v.(int); ok {
+			self.registers[reg] = -i
+		} else {
+			panic("bad operand value")
+		}
+		self.pc += 2
 	default:
-
+		if self.code[self.pc] > LESS {
+			panic("bad instruction")
+		} else {
+			self.computeNumber()
+		}
 	}
 }
 
@@ -100,7 +137,115 @@ func (self *VM) moveHeapValue() {
 	self.pc += 4
 }
 
+func (self *VM) callFunction() {
+	value := self.registers[decodeRegister(self.code[self.pc + 1])]
+	numOfArgs := int(self.code[self.pc + 2])
 
+	if fn, ok := value.(*ast.VMFunction);
+		ok && fn.Parameters().Size() == numOfArgs {
+		self.ret = self.pc + 3
+		self.pc = fn.Entry()
+	} else if  fnc, ok := value.(*environment.NativeFunction);
+		ok && fnc.NumParammeters() == numOfArgs {
+		params := make([]reflect.Value, numOfArgs)
+		for i := 0; i < numOfArgs; i++ {
+			params[i] = reflect.ValueOf(self.stack[self.sp + i])
+		}
+		self.stack[self.sp] = fnc.Invoke(params)
+		self.pc += 3
+	} else {
+		panic("bac function call")
+	}
+}
+
+func (self *VM) saveRegisters() {
+	size := decodeOffset(self.code[self.pc + 1])
+	dest := size + self.sp
+
+	for i := 0; i < NUM_OF_REG; i++ {
+		self.stack[dest] = self.registers[i]
+		dest++
+	}
+	self.stack[dest] = self.fp
+	dest++
+	self.fp = self.sp
+	self.sp += size + SAVE_AREA_SIZE
+	self.stack[dest] = self.ret
+	self.pc += 2
+}
+
+func (self *VM) restoreRegisters() {
+	dest := decodeOffset(self.code[self.pc + 1]) + self.fp
+	for i := 0; i < NUM_OF_REG; i++ {
+		self.registers[i] = self.stack[dest]
+		dest++
+	}
+	self.sp = self.fp
+	self.fp = self.stack[dest].(int)
+	dest++
+	self.ret = self.stack[dest].(int)
+	self.pc += 2
+}
+
+func (self *VM) computeNumber() {
+	leftIndex := decodeRegister(self.code[self.pc + 1])
+	rightIndex := decodeRegister(self.code[self.pc + 2])
+	left := self.registers[leftIndex]
+	right := self.registers[rightIndex]
+	leftKind := reflect.TypeOf(left).Kind()
+	rightKind := reflect.TypeOf(right).Kind()
+
+	if leftKind == reflect.Int && rightKind == reflect.Int {
+		i1, i2 := left.(int), right.(int)
+		var i3 int
+
+		switch self.code[self.pc] {
+		case ADD:i3 =  i1 + i2
+		case SUB: i3 =  i1 - i2
+		case MUL: i3 =  i1 * i2
+		case DIV: i3 =  i1 / i2
+		case REM: i3 =  i1 % i2
+		case EQUAL: if i1 == i2 {
+			i3 =  1
+		} else {
+			i3 =  0
+		}
+		case MORE: if i1 > i2 {
+			i3 =  1
+		} else {
+			i3 =  0
+		}
+		case LESS: if i1 < i2 {
+			i3 =  1
+		} else {
+			i3 =  0
+		}
+		default: panic("bad operator")
+		}
+
+		self.registers[leftIndex] = i3
+	} else {
+		if self.code[self.pc] == ADD {
+			if leftKind == reflect.String && rightKind == reflect.String {
+				self.registers[leftIndex] = left.(string) + right.(string)
+			} else if leftKind == reflect.String && rightKind == reflect.Int {
+				self.registers[leftIndex] = left.(string) + strconv.Itoa(right.(int))
+			} else if leftKind == reflect.Int && rightKind == reflect.String {
+				self.registers[leftIndex] = strconv.Itoa(left.(int)) + right.(string)
+			} else {
+				panic("bad operands for ADD")
+			}
+		} else if self.code[self.pc] == EQUAL {
+			if left == right {
+				self.registers[leftIndex] = TRUE
+			} else {
+				self.registers[leftIndex] = FALSE
+			}
+		} else {
+			panic("bad instruction")
+		}
+	}
+}
 
 func readInt(b []int8, i int) int {
 	x := uint32(b[i + 3]) | uint32(b[i + 2]) << 8 | uint32(b[i + 1]) << 16 | uint32(b[i]) << 24
