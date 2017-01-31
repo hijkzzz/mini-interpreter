@@ -30,7 +30,7 @@ func (self *WhileStmnt) Eval(env environment.Environment, args... interface{}) i
 	var result interface{}
 	for true {
 		c := self.Condition().Eval(env)
-		if reflect.TypeOf(c).Kind() == reflect.Int && c.(int) == 0 {
+		if reflect.TypeOf(c).Kind() == reflect.Int && c.(int) == FALSE {
 			return result
 		} else {
 			result = self.Body().Eval(env)

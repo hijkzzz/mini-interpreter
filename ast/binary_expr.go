@@ -6,6 +6,11 @@ import (
 	"stone/environment"
 )
 
+const (
+	TRUE           = 1
+	FALSE          = 0
+)
+
 type BinaryExpr struct {
 	astList
 }
@@ -97,9 +102,9 @@ func (self *BinaryExpr) computeOp(left interface{}, op string, right interface{}
 			}
 		} else if op == "==" {
 			if left == right  {
-				return 1
+				return TRUE
 			} else {
-				return 0
+				return FALSE
 			}
 		} else {
 			panic("bad type")
@@ -115,19 +120,19 @@ func (self *BinaryExpr) computeNumber(left int, op string, right int) int {
 	case "/": return left / right
 	case "%": return left % right
 	case "==": if left == right {
-		return 1
+		return TRUE
 	} else {
-		return 0
+		return FALSE
 	}
 	case ">": if left > right {
-		return 1
+		return TRUE
 	} else {
-		return 0
+		return FALSE
 	}
 	case "<": if left < right {
-		return 1
+		return TRUE
 	} else {
-		return 0
+		return FALSE
 	}
 	default: panic("bad operator")
 	}

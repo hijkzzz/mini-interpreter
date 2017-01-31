@@ -206,19 +206,19 @@ func (self *VM) computeNumber() {
 		case DIV: i3 =  i1 / i2
 		case REM: i3 =  i1 % i2
 		case EQUAL: if i1 == i2 {
-			i3 =  1
+			i3 = TRUE
 		} else {
-			i3 =  0
+			i3 = FALSE
 		}
 		case MORE: if i1 > i2 {
-			i3 =  1
+			i3 = TRUE
 		} else {
-			i3 =  0
+			i3 = FALSE
 		}
 		case LESS: if i1 < i2 {
-			i3 =  1
+			i3 = TRUE
 		} else {
-			i3 =  0
+			i3 = FALSE
 		}
 		default: panic("bad operator")
 		}

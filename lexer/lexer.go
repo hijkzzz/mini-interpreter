@@ -15,6 +15,10 @@ import (
 	源文件被分割为——数字，字符串，标识符序列
  */
 
+// 注释|数字|字符串|标识符（且不许为空）
+var regexPat string =
+	`\s*(?:(//.*)|([0-9]+)|"((?:\\"|\\\\|\\n|[^"])*)"|([A-Z_a-z][A-Z_a-z0-9]*|==|<=|>=|&&|\|\||[[:punct:]]))|\s+`
+
 type Lexer struct {
 	queue []token.Token
 	hasMore bool
@@ -22,10 +26,6 @@ type Lexer struct {
 	reader *bufio.Scanner
 	lineNo int
 }
-
-// 注释|数字|字符串|标识符（且不许为空）
-var regexPat string =
-	`\s*(?:(//.*)|([0-9]+)|"((?:\\"|\\\\|\\n|[^"])*)"|([A-Z_a-z][A-Z_a-z0-9]*|==|<=|>=|&&|\|\||[[:punct:]]))|\s+`
 
 func NewLexer(r io.Reader) *Lexer{
 	return &Lexer{nil, true, regexp.MustCompile(regexPat), bufio.NewScanner(r), 0}

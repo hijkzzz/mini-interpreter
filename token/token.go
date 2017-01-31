@@ -5,6 +5,9 @@ package token
 	数字，字符串，标识符三种类型
  */
 
+var EOF Token = &token{-1}
+var EOL string = "\\n"
+
 type Token interface {
 	GetLineNumber() int
 	GetNumber() int
@@ -17,9 +20,6 @@ type Token interface {
 type token struct {
 	lineNumber int
 }
-
-var EOF Token = &token{-1}
-var EOL string = "\\n"
 
 func (self *token) GetLineNumber() int {
 	return self.lineNumber
