@@ -1,7 +1,6 @@
 # stone
-![Build Status](https://img.shields.io/teamcity/codebetter/bt428.svg)
 
-A Scripting Language
+A Scripting Language based on Golang
 
 ## Specification 
 ### Types
