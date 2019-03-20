@@ -134,7 +134,7 @@ timestamp() int				Return UNIX timpstamp
 
 ## Requirement
 
-* Go
+* Golang
 
 ## Build 
 
@@ -148,6 +148,9 @@ go build
 ```
 ./stone [source file name]
 ```
+
+## TODO
+Virtual Machine
 
 ## References
 - 两周自制脚本语言
