@@ -150,7 +150,7 @@ go build
 ```
 
 ## TODO
-Virtual Machine
+- Virtual Machine
 
 ## References
 - 两周自制脚本语言
